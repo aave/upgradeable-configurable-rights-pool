@@ -17,6 +17,7 @@ import "./utils/BalancerOwnable.sol";
 import { RightsManager } from "../libraries/RightsManager.sol";
 import "../libraries/SmartPoolManager.sol";
 import "../libraries/SafeApprove.sol";
+import "./lib/VersionedInitializable.sol";
 
 // Contracts
 
@@ -38,7 +39,7 @@ import "../libraries/SafeApprove.sol";
  * To make this explicit, we could write "IBPool(address(bPool)).function()" everywhere,
  *   instead of "bPool.function()".
  */
-contract ConfigurableRightsPool is PCToken, BalancerOwnable, BalancerReentrancyGuard {
+contract ConfigurableRightsPool is VersionedInitializable, PCToken, BalancerOwnable, BalancerReentrancyGuard {
     using BalancerSafeMath for uint;
     using SafeApprove for IERC20;
 
@@ -56,6 +57,8 @@ contract ConfigurableRightsPool is PCToken, BalancerOwnable, BalancerReentrancyG
     }
 
     // State variables
+
+    uint256 public constant REVISION = 1;
 
     IBFactory public bFactory;
     IBPool public bPool;
@@ -162,7 +165,7 @@ contract ConfigurableRightsPool is PCToken, BalancerOwnable, BalancerReentrancyG
     // Function declarations
 
     /**
-     * @notice Construct a new Configurable Rights Pool (wrapper around BPool)
+     * @notice Initializes a new Configurable Rights Pool (wrapper around BPool)
      * @dev _initialTokens and _swapFee are only used for temporary storage between construction
      *      and create pool, and should not be used thereafter! _initialTokens is destroyed in
      *      createPool to prevent this, and _swapFee is kept in sync (defensively), but
@@ -171,14 +174,18 @@ contract ConfigurableRightsPool is PCToken, BalancerOwnable, BalancerReentrancyG
      * @param poolParams - struct containing pool parameters
      * @param rightsStruct - Set of permissions we are assigning to this smart pool
      */
-    constructor(
+    function initialize(
         address factoryAddress,
         PoolParams memory poolParams,
         RightsManager.Rights memory rightsStruct
     )
-        public
-        PCToken(poolParams.poolTokenSymbol, poolParams.poolTokenName)
+        external
+        initializer
     {
+        _initializeOwner();
+        _initializeReentrancyGuard();
+        _initializePCToken(poolParams.poolTokenSymbol, poolParams.poolTokenName);
+
         // We don't have a pool yet; check now or it will fail later (in order of likelihood to fail)
         // (and be unrecoverable if they don't have permission set to change it)
         // Most likely to fail, so check first
@@ -1041,5 +1048,13 @@ contract ConfigurableRightsPool is PCToken, BalancerOwnable, BalancerReentrancyG
 
     function _burnPoolShare(uint amount) internal  {
         _burn(amount);
+    }
+
+    /**
+     * @dev returns the revision of the implementation contract
+     * @return The revision
+     */
+    function getRevision() internal override pure returns (uint256) {
+        return REVISION;
     }
 }

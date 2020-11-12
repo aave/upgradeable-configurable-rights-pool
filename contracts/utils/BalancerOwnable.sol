@@ -37,7 +37,7 @@ contract BalancerOwnable {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor () internal {
+    function _initializeOwner() internal {
         _owner = msg.sender;
     }
 

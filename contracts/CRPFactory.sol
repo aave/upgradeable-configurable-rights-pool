@@ -7,6 +7,7 @@ pragma experimental ABIEncoderV2;
 // Imports
 
 import "./ConfigurableRightsPool.sol";
+import "./lib/InitializableAdminUpgradeabilityProxy.sol";
 
 // Contracts
 
@@ -50,7 +51,9 @@ contract CRPFactory {
     function newCrp(
         address factoryAddress,
         ConfigurableRightsPool.PoolParams calldata poolParams,
-        RightsManager.Rights calldata rights
+        RightsManager.Rights calldata rights,
+        address smartPoolImplementation,
+        address proxyAdmin
     )
         external
         returns (ConfigurableRightsPool)
@@ -61,11 +64,17 @@ contract CRPFactory {
         require(poolParams.tokenBalances.length == poolParams.constituentTokens.length, "ERR_START_BALANCES_MISMATCH");
         require(poolParams.tokenWeights.length == poolParams.constituentTokens.length, "ERR_START_WEIGHTS_MISMATCH");
 
-        ConfigurableRightsPool crp = new ConfigurableRightsPool(
+        InitializableAdminUpgradeabilityProxy proxy = new InitializableAdminUpgradeabilityProxy();
+
+        bytes memory callData = abi.encodeWithSignature(
+            "initialize(address,(string,string,address[],uint256[],uint256[],uint256),(bool,bool,bool,bool,bool,bool))",
             factoryAddress,
             poolParams,
             rights
         );
+        proxy.initialize(smartPoolImplementation, proxyAdmin, callData);
+
+        ConfigurableRightsPool crp = ConfigurableRightsPool(address(proxy));
 
         emit LogNewCrp(msg.sender, address(crp));
 
