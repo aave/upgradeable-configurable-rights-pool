@@ -9,6 +9,7 @@ const truffleAssert = require('truffle-assertions');
 
 contract('configurableWeightsUMA', async (accounts) => {
     const admin = accounts[0];
+    const proxyAdmin = accounts[1];
     const { toWei } = web3.utils;
 
     const MAX = web3.utils.toTwosComplement(-1);
@@ -25,6 +26,7 @@ contract('configurableWeightsUMA', async (accounts) => {
     };
 
     describe('Factory_UMA', () => {
+        let crpImpl;
         let bfactory;
         let factory;
         let controller;
@@ -44,6 +46,7 @@ contract('configurableWeightsUMA', async (accounts) => {
         before(async () => {
             bfactory = await BFactory.deployed();
             factory = await CRPFactory.deployed();
+            crpImpl = await ConfigurableRightsPool.deployed();
             xyz = await TToken.new('XYZ', 'XYZ', 18);
             weth = await TToken.new('Wrapped Ether', 'WETH', 18);
             dai = await TToken.new('Dai Stablecoin', 'DAI', 18);
@@ -72,12 +75,16 @@ contract('configurableWeightsUMA', async (accounts) => {
                 bfactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin,
             );
 
             await factory.newCrp(
                 bfactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin,
             );
 
             controller = await ConfigurableRightsPool.at(CONTROLLER);

@@ -31,11 +31,13 @@ function newWeight(block, startBlock, endBlock, startWeight, endWeight) {
 
 contract('configurableWeights', async (accounts) => {
     const admin = accounts[0];
+    const proxyAdmin = accounts[5];
     const { toWei } = web3.utils;
     const { fromWei } = web3.utils;
     const errorDelta = 10 ** -8;
     const MAX = web3.utils.toTwosComplement(-1);
 
+    let crpImpl;
     let crpFactory;
     let bFactory;
     let crpPool;
@@ -80,6 +82,7 @@ contract('configurableWeights', async (accounts) => {
         before(async () => {
             bFactory = await BFactory.deployed();
             crpFactory = await CRPFactory.deployed();
+            crpImpl = await ConfigurableRightsPool.deployed();
             xyz = await TToken.new('XYZ', 'XYZ', 18);
             weth = await TToken.new('Wrapped Ether', 'WETH', 18);
             dai = await TToken.new('Dai Stablecoin', 'DAI', 18);
@@ -111,12 +114,16 @@ contract('configurableWeights', async (accounts) => {
                 bFactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin,
             );
 
             await crpFactory.newCrp(
                 bFactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin,
             );
 
             crpPool = await ConfigurableRightsPool.at(CRPPOOL);
@@ -255,6 +262,7 @@ contract('configurableWeights', async (accounts) => {
         beforeEach(async () => {
             bFactory = await BFactory.deployed();
             crpFactory = await CRPFactory.deployed();
+            crpImpl = await ConfigurableRightsPool.deployed();
             xyz = await TToken.new('XYZ', 'XYZ', 18);
             weth = await TToken.new('Wrapped Ether', 'WETH', 18);
             dai = await TToken.new('Dai Stablecoin', 'DAI', 18);
@@ -286,12 +294,16 @@ contract('configurableWeights', async (accounts) => {
                 bFactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin,
             );
 
             await crpFactory.newCrp(
                 bFactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin,
             );
 
             crpPool = await ConfigurableRightsPool.at(CRPPOOL);

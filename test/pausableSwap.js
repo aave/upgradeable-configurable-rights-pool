@@ -11,11 +11,13 @@ const { calcOutGivenIn, calcInGivenOut, calcRelativeDiff } = require('../lib/cal
 contract('pausableSwap', async (accounts) => {
     const admin = accounts[0];
     const user = accounts[1];
+    const proxyAdmin = accounts[2];
 
     const { toWei, fromWei } = web3.utils;
     const MAX = web3.utils.toTwosComplement(-1);
     const errorDelta = 10 ** -8;
 
+    let crpImpl;
     let crpFactory; let
         bFactory;
     let crpPool;
@@ -57,6 +59,7 @@ contract('pausableSwap', async (accounts) => {
         */
         bFactory = await BFactory.deployed();
         crpFactory = await CRPFactory.deployed();
+        crpImpl = await ConfigurableRightsPool.deployed();
         xyz = await TToken.new('XYZ', 'XYZ', 18);
         weth = await TToken.new('Wrapped Ether', 'WETH', 18);
         dai = await TToken.new('Dai Stablecoin', 'DAI', 18);
@@ -90,12 +93,16 @@ contract('pausableSwap', async (accounts) => {
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         await crpFactory.newCrp(
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         crpPool = await ConfigurableRightsPool.at(CRPPOOL);

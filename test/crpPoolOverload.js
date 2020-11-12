@@ -14,6 +14,7 @@ BPool deployment, token binding, balance checks, BPT checks.
 */
 contract('crpPoolOverloadTests', async (accounts) => {
     const admin = accounts[0];
+    const proxyAdmin = accounts[1];
     const { toWei, fromWei } = web3.utils;
     const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
     const MAX = web3.utils.toTwosComplement(-1);
@@ -33,6 +34,7 @@ contract('crpPoolOverloadTests', async (accounts) => {
         canChangeCap: false,
     };
 
+    let crpImpl;
     let crpFactory;
     let bFactory; 
     let bPool;
@@ -50,6 +52,7 @@ contract('crpPoolOverloadTests', async (accounts) => {
     before(async () => {
         bFactory = await BFactory.deployed();
         crpFactory = await CRPFactory.deployed();
+        crpImpl = await ConfigurableRightsPool.deployed();
         xyz = await TToken.new('XYZ', 'XYZ', 18);
         weth = await TToken.new('Wrapped Ether', 'WETH', 18);
         dai = await TToken.new('Dai Stablecoin', 'DAI', 18);
@@ -77,12 +80,16 @@ contract('crpPoolOverloadTests', async (accounts) => {
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         await crpFactory.newCrp(
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         crpPool = await ConfigurableRightsPool.at(CRPPOOL);

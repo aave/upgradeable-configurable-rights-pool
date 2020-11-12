@@ -11,6 +11,7 @@ contract('configurableWeights_withTx', async (accounts) => {
     const admin = accounts[0];
     const user1 = accounts[1];
     const user2 = accounts[2];
+    const proxyAdmin = accounts[3];
 
     const swapFee = 10**15;
 
@@ -30,6 +31,7 @@ contract('configurableWeights_withTx', async (accounts) => {
     };
 
     describe('Factory', () => {
+        let crpImpl;
         let bfactory;
         let factory;
         let controller;
@@ -47,6 +49,7 @@ contract('configurableWeights_withTx', async (accounts) => {
         before(async () => {
             bfactory = await BFactory.deployed();
             factory = await CRPFactory.deployed();
+            crpImpl = await ConfigurableRightsPool.deployed();
             xyz = await TToken.new('XYZ', 'XYZ', 18);
             weth = await TToken.new('Wrapped Ether', 'WETH', 18);
             dai = await TToken.new('Dai Stablecoin', 'DAI', 18);
@@ -83,12 +86,16 @@ contract('configurableWeights_withTx', async (accounts) => {
                 bfactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin,
             );
 
             await factory.newCrp(
                 bfactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin,
             );
 
             controller = await ConfigurableRightsPool.at(CONTROLLER);

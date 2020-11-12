@@ -16,12 +16,14 @@ contract('Bankless Simulation', async (accounts) => {
     const user1 = accounts[1];
     const user2 = accounts[2];
     const user3 = accounts[3];
+    const proxyAdmin = accounts[4];
 
     const { toWei, fromWei } = web3.utils;
     const MAX = web3.utils.toTwosComplement(-1);
     const errorDelta = 10 ** -8;
     const numPoolTokens = '1000';
 
+    let crpImpl;
     let crpFactory; 
     let bFactory;
     let crpPool;
@@ -53,6 +55,7 @@ contract('Bankless Simulation', async (accounts) => {
     before(async () => {
         bFactory = await BFactory.deployed();
         crpFactory = await CRPFactory.deployed();
+        crpImpl = await ConfigurableRightsPool.deployed();
         bap0 = await TToken.new('BAP Gen 0', 'BAP0', 18);
         weth = await TToken.new('Wrapped Ether', 'WETH', 18);
         dai = await TToken.new('Dai Stablecoin', 'DAI', 18);
@@ -84,12 +87,16 @@ contract('Bankless Simulation', async (accounts) => {
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         await crpFactory.newCrp(
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         crpPool = await ConfigurableRightsPool.at(CRPPOOL);

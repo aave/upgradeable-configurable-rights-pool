@@ -15,10 +15,12 @@ const { time } = require('@openzeppelin/test-helpers');
 
 contract('testERC20 violations', async (accounts) => {
     const admin = accounts[0];
+    const proxyAdmin = accounts[1];
     const { toWei } = web3.utils;
 
     const MAX = web3.utils.toTwosComplement(-1);
 
+    let crpImpl;
     let crpFactory;
     let bFactory;
     let crpPool;
@@ -59,6 +61,7 @@ contract('testERC20 violations', async (accounts) => {
     before(async () => {
         bFactory = await BFactory.deployed();
         crpFactory = await CRPFactory.deployed();
+        crpImpl = await ConfigurableRightsPool.deployed();
         xyz = await TToken.new('XYZ', 'XYZ', 18);
         weth = await TToken.new('Wrapped Ether', 'WETH', 18);
         dai = await TToken.new('Dai Stablecoin', 'DAI', 18);
@@ -99,12 +102,16 @@ contract('testERC20 violations', async (accounts) => {
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         await crpFactory.newCrp(
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         crpPool = await ConfigurableRightsPool.at(CRPPOOL);
@@ -183,13 +190,15 @@ contract('testERC20 violations', async (accounts) => {
             swapFee: swapFee,
         }
 
+        // Reverts with ERR_NO_ZERO_XFER
         await truffleAssert.reverts(
             crpFactory.newCrp(
                 bFactory.address,
                 poolParams,
                 permissions,
-            ),
-            'ERR_NO_ZERO_XFER'
+                crpImpl.address,
+                proxyAdmin,
+            )
         );
     });
 
@@ -207,13 +216,15 @@ contract('testERC20 violations', async (accounts) => {
             swapFee: swapFee,
         }
 
+        // Reverts with ERR_NONCONFORMING_TOKEN
         await truffleAssert.reverts(
             crpFactory.newCrp(
                 bFactory.address,
                 poolParams,
                 permissions,
-            ),
-            'ERR_NONCONFORMING_TOKEN'
+                crpImpl.address,
+                proxyAdmin,
+            )
         );
     });
 });
