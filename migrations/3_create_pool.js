@@ -39,7 +39,7 @@ module.exports = async function (deployer, network) {
       canChangeWeights: true,
       canAddRemoveTokens: true,
       canWhitelistLPs: false,
-      canChangeCap: true,
+      canChangeCap: false,
     };
 
     // call to estimate address
