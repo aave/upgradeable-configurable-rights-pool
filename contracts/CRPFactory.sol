@@ -47,6 +47,8 @@ contract CRPFactory {
      * @param factoryAddress - the BFactory instance used to create the underlying pool
      * @param poolParams - struct containing the names, tokens, weights, balances, and swap fee
      * @param rights - struct of permissions, configuring this CRP instance (see above for definitions)
+     * @param smartPoolImplementation - the address of the implementation contract for the CRP
+     * @param proxyAdmin - the address to be assigned as admin of the proxy contract that uses the CRP implementation
      */
     function newCrp(
         address factoryAddress,

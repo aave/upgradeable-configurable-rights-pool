@@ -16,13 +16,14 @@ Creates new ConfigurableRightsPools & stores their addresses in a registry.
 
 #### `newCrp`
 
-Creates new ConfigurableRightsPools with the caller as the contract controller.
+Creates new Proxy for ConfigurableRightsPools with the caller as the contract controller.
 
 ##### Params
 * `address factoryAddress` - BFactory address.
 * `PoolParams poolParams` - Structure holding the main parameters that define this pool
 * `RightsManager.Rights rights` - Structure defined in an external linked library, with boolean flags for each right
-
+* `smartPoolImplementation` - Address of the implementation contract for the CRP
+* `proxyAdmin` - Address to be assigned as admin of the proxy contract that uses the CRP implementation 
 
 ##### Pool Params structure
 * `string poolTokenSymbol` - Symbol of the Balancer Pool Token representing this pool
@@ -176,3 +177,42 @@ You cannot exit 100% using Pool Tokens (rebind will revert). It is possible to d
 `yarn testrpc`
 
 `yarn test`
+
+## Contracts Deployment
+Install dependencies
+
+`yarn`
+
+Compile contracts
+
+`yarn compile`
+
+### Configuration
+Create an `.env` file from the `.env.example` and fill the variables
+
+The configuration for the pool rights is the following:
+```
+const permissions = {
+  canPauseSwapping: false,
+  canChangeSwapFee: true,
+  canChangeWeights: true,
+  canAddRemoveTokens: true,
+  canWhitelistLPs: false,
+  canChangeCap: false,
+}
+```
+
+### Run deployment scripts
+Running the deployment script will:
+- Deploy the ConfigurableRightsPool implementation contract
+- Deploy the CRPFactory
+- Call `CRPFactory.newCrp` to create and initialize a new proxy smart pool using the ConfigurableRightsPool implementation address.
+- Call `crpPool.createPool` on the proxy smart pool to create the BPool with the initial supply of 100 tokens
+
+#### Kovan deploy
+
+`yarn run deploy:kovan`
+
+#### Mainnet deploy
+
+`yarn run deploy:mainnet`

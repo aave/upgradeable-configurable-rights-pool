@@ -12,7 +12,9 @@
         "coverage": "yarn solidity-coverage",
         "lint": "eslint .",
         "lint:contracts": "solhint contracts/**/*.sol",
-        "lint:libraries": "solhint libraries/*.sol"
+        "lint:libraries": "solhint libraries/*.sol",
+        "deploy:kovan": "truffle migrate --network kovan",
+        "deploy:mainnet": "truffle migrate --network mainnet"
     },
     "repository": {
         "type": "git",
