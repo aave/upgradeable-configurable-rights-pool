@@ -24,6 +24,9 @@ module.exports = async function (deployer, network) {
     const crpImpl = await ConfigurableRightsPool.deployed();
     const crpFactory = await CRPFactory.deployed();
 
+    console.log("ConfigurableRightsPool Implementation address:", crpImpl.address);
+    console.log("CRPFactory address:", crpFactory.address);
+
     const poolParams = {
       poolTokenSymbol: SYMBOL,
       poolTokenName: NAME,
