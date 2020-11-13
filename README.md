@@ -216,3 +216,12 @@ Running the deployment script will:
 #### Mainnet deploy
 
 `yarn run deploy:mainnet`
+
+## Verify contracts
+
+The flattened versions of the contracts included in `flats` can be used to manually verify the contracts in the explorer with a single file.
+Notice that for the ConfigurableRightsPool implementation contract the libraries addresses should be included in the verification.
+
+To generate them again, run `yarn run flatten`
+
+Then remove the duplicated lines of `SPDX-License-Identifier: GPL-3.0-or-later` and `pragma experimental ABIEncoderV2;` since that will produce and error in the explorer verification as it expect only one license and ABIEncoderV2 instruction per file.

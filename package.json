@@ -13,6 +13,7 @@
         "lint": "eslint .",
         "lint:contracts": "solhint contracts/**/*.sol",
         "lint:libraries": "solhint libraries/*.sol",
+        "flatten": "bash scripts/flatten.sh",
         "deploy:kovan": "truffle migrate --network kovan",
         "deploy:mainnet": "truffle migrate --network mainnet"
     },
@@ -40,6 +41,7 @@
         "standard": "^14.0.2",
         "truffle": "^5.0.41",
         "truffle-assertions": "^0.9.1",
+        "truffle-flattener": "^1.5.0",
         "truffle-hdwallet-provider": "^1.0.17",
         "web3": "^1.2.0"
     },
