@@ -4,6 +4,7 @@ const TToken = artifacts.require('TToken');
 const { toWei }  = require('web3').utils
 
 const addresses = require('../helpers/addresses');
+const permissions = require('../helpers/permissions');
 
 module.exports = async function (deployer, network) {
   if (network !== 'development' && network !== 'coverage') {
@@ -35,15 +36,6 @@ module.exports = async function (deployer, network) {
       tokenWeights: [A_TOKEN_WEIGHT, B_TOKEN_WEIGHT],
       swapFee: SWAP_FEE,
     }
-
-    const permissions = {
-      canPauseSwapping: false,
-      canChangeSwapFee: true,
-      canChangeWeights: true,
-      canAddRemoveTokens: true,
-      canWhitelistLPs: false,
-      canChangeCap: false,
-    };
 
     // call to estimate address
     const crpPoolAddress  = await crpFactory.newCrp.call(

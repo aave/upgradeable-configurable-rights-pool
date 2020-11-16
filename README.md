@@ -190,10 +190,10 @@ Compile contracts
 ### Configuration
 Create an `.env` file from the `.env.example` and fill the variables
 
-The configuration for the pool rights is the following:
+The default configuration for the pool rights available [here](./helpers/permissions.js) is the following:
 ```
 const permissions = {
-  canPauseSwapping: false,
+  canPauseSwapping: true,
   canChangeSwapFee: true,
   canChangeWeights: true,
   canAddRemoveTokens: true,
@@ -202,11 +202,16 @@ const permissions = {
 }
 ```
 
+Notes:
+- If `canWhitelistLPs` is `true` then the pool will be private and only whitelisted addresses can provide liquidity.
+- If `canChangeCap` is `true` then the default cap will be the initial supply (`100`), and it should be manually updated by calling `setCap` to allow new liquidity to be provided.
+
 ### Run deployment scripts
 Running the deployment script will:
 - Deploy the ConfigurableRightsPool implementation contract
 - Deploy the CRPFactory
 - Call `CRPFactory.newCrp` to create and initialize a new proxy smart pool using the ConfigurableRightsPool implementation address.
+- Give allowance to the crpPool on both involved tokens
 - Call `crpPool.createPool` on the proxy smart pool to create the BPool with the initial supply of 100 tokens
 
 #### Kovan deploy
