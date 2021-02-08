@@ -10,10 +10,12 @@ const { time } = require('@openzeppelin/test-helpers');
 
 contract('configurableAddRemoveTokens - join/exit after add', async (accounts) => {
     const admin = accounts[0];
+    const proxyAdmin = accounts[1];
     const { toWei } = web3.utils;
 
     const MAX = web3.utils.toTwosComplement(-1);
 
+    let crpImpl;
     let crpFactory;
     let bFactory;
     let crpPool;
@@ -59,6 +61,7 @@ contract('configurableAddRemoveTokens - join/exit after add', async (accounts) =
         */
         bFactory = await BFactory.deployed();
         crpFactory = await CRPFactory.deployed();
+        crpImpl = await ConfigurableRightsPool.deployed();
         xyz = await TToken.new('XYZ', 'XYZ', 18);
         weth = await TToken.new('Wrapped Ether', 'WETH', 18);
         dai = await TToken.new('Dai Stablecoin', 'DAI', 18);
@@ -93,12 +96,16 @@ contract('configurableAddRemoveTokens - join/exit after add', async (accounts) =
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         await crpFactory.newCrp(
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         crpPool = await ConfigurableRightsPool.at(CRPPOOL);

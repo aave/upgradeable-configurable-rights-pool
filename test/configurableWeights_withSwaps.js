@@ -13,6 +13,7 @@ contract('configurableWeights_withSwaps', async (accounts) => {
     const admin = accounts[0];
     const user1 = accounts[1];
     const user2 = accounts[2];
+    const proxyAdmin = accounts[3];
 
     const { toWei, fromWei } = web3.utils;
 
@@ -33,6 +34,7 @@ contract('configurableWeights_withSwaps', async (accounts) => {
     };
 
     describe('CWS Factory', () => {
+        let crpImpl;
         let bfactory;
         let factory;
         let controller;
@@ -49,6 +51,7 @@ contract('configurableWeights_withSwaps', async (accounts) => {
         before(async () => {
             bfactory = await BFactory.deployed();
             factory = await CRPFactory.deployed();
+            crpImpl = await ConfigurableRightsPool.deployed();
             xyz = await TToken.new('XYZ', 'XYZ', 18);
             weth = await TToken.new('Wrapped Ether', 'WETH', 18);
             abc = await TToken.new('ABC', 'ABC', 18);
@@ -83,12 +86,16 @@ contract('configurableWeights_withSwaps', async (accounts) => {
                 bfactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin,
             );
 
             await factory.newCrp(
                 bfactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin,
             );
 
             controller = await ConfigurableRightsPool.at(CONTROLLER);

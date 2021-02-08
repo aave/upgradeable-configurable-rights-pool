@@ -12,11 +12,13 @@ contract('configurableLPNoWhitelist', async (accounts) => {
     const admin = accounts[0];
     const admin2 = accounts[1];
     const admin3 = accounts[2];
+    const proxyAdmin = accounts[3];
 
     const { toWei } = web3.utils;
 
     const MAX = web3.utils.toTwosComplement(-1);
 
+    let crpImpl;
     let crpFactory; let
         bFactory;
     let crpPool;
@@ -44,6 +46,7 @@ contract('configurableLPNoWhitelist', async (accounts) => {
     before(async () => {
         bFactory = await BFactory.deployed();
         crpFactory = await CRPFactory.deployed();
+        crpImpl = await ConfigurableRightsPool.deployed();
         xyz = await TToken.new('XYZ', 'XYZ', 18);
         weth = await TToken.new('Wrapped Ether', 'WETH', 18);
         dai = await TToken.new('Dai Stablecoin', 'DAI', 18);
@@ -72,12 +75,16 @@ contract('configurableLPNoWhitelist', async (accounts) => {
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         await crpFactory.newCrp(
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         crpPool = await ConfigurableRightsPool.at(CRPPOOL);
@@ -129,11 +136,13 @@ contract('configurableLP', async (accounts) => {
     const admin = accounts[0];
     const admin2 = accounts[1];
     const admin3 = accounts[2];
+    const proxyAdmin = accounts[3];
 
     const { toWei } = web3.utils;
 
     const MAX = web3.utils.toTwosComplement(-1);
 
+    let crpImpl;
     let crpFactory;
     let bFactory;
     let crpPool;
@@ -159,6 +168,7 @@ contract('configurableLP', async (accounts) => {
     before(async () => {
         bFactory = await BFactory.deployed();
         crpFactory = await CRPFactory.deployed();
+        crpImpl = await ConfigurableRightsPool.deployed();
         xyz = await TToken.new('XYZ', 'XYZ', 18);
         weth = await TToken.new('Wrapped Ether', 'WETH', 18);
         dai = await TToken.new('Dai Stablecoin', 'DAI', 18);
@@ -187,12 +197,16 @@ contract('configurableLP', async (accounts) => {
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         await crpFactory.newCrp(
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         crpPool = await ConfigurableRightsPool.at(CRPPOOL);

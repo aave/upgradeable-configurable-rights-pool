@@ -16,13 +16,14 @@ Creates new ConfigurableRightsPools & stores their addresses in a registry.
 
 #### `newCrp`
 
-Creates new ConfigurableRightsPools with the caller as the contract controller.
+Creates new Proxy for ConfigurableRightsPools with the caller as the contract controller.
 
 ##### Params
 * `address factoryAddress` - BFactory address.
 * `PoolParams poolParams` - Structure holding the main parameters that define this pool
 * `RightsManager.Rights rights` - Structure defined in an external linked library, with boolean flags for each right
-
+* `smartPoolImplementation` - Address of the implementation contract for the CRP
+* `proxyAdmin` - Address to be assigned as admin of the proxy contract that uses the CRP implementation 
 
 ##### Pool Params structure
 * `string poolTokenSymbol` - Symbol of the Balancer Pool Token representing this pool
@@ -169,17 +170,6 @@ Interface for the [Balancer Factory](https://github.com/balancer-labs/balancer-c
 
 You cannot exit 100% using Pool Tokens (rebind will revert). It is possible to do using unbind with special permissions, but the trade-off is a potential loss of security. As described above, you can exit 1/3 at a time, or call removeToken if you have the right (keeping in mind that removing all tokens destroys the pool).
 
-## Balancer Pool Templates
-
-Our vision is to provide a set of configurable Balancer Pools that are feature-rich and flexible enough to be used "out of the box" in most cases, and easily extended otherwise.
-<br><br>Beyond the standard Configurable Rights Pool, the first such template (used by [Ampleforth](https://ampleforth.org)) is designed for pools containing tokens with "Elastic Supply" (e.g., AMPL). With "Fixed Supply" tokens, notably Bitcoin, your wallet balance remains constant (one hopes), but the price responds to supply and demand. <br><br>By contrast, Elastic Supply tokens expand and contract the **supply** in response to demand. The balance in your wallet <em>can change</em> (after each daily **rebase**) - but you always own a fixed proportion of the total number of tokens.
-
-These go in the [templates](https://github.com/balancer-labs/configurable-rights-pool/tree/master/contracts/templates) directory. The first is `ElasticSupplyPool` (and corresponding `ESPFactory`)
-
-There is a tutorial in the docs [here](https://docs.balancer.finance/guides/crp-tutorial).
-
-Questions about Smart Pools? Join us on [Discord](https://discord.gg/qjFcczk)! Want to integrate configurable smart pools into your own project? The smart-pool-dev channel is for you.
-
 ## Getting Started - Local Testing
 
 `yarn`
@@ -187,3 +177,56 @@ Questions about Smart Pools? Join us on [Discord](https://discord.gg/qjFcczk)! W
 `yarn testrpc`
 
 `yarn test`
+
+## Contracts Deployment
+Install dependencies
+
+`yarn`
+
+Compile contracts
+
+`yarn compile`
+
+### Configuration
+Create an `.env` file from the `.env.example` and fill the variables
+
+The default configuration for the pool rights available [here](./helpers/permissions.js) is the following:
+```
+const permissions = {
+  canPauseSwapping: true,
+  canChangeSwapFee: true,
+  canChangeWeights: true,
+  canAddRemoveTokens: true,
+  canWhitelistLPs: false,
+  canChangeCap: false,
+}
+```
+
+Notes:
+- If `canWhitelistLPs` is `true` then the pool will be private and only whitelisted addresses can provide liquidity.
+- If `canChangeCap` is `true` then the default cap will be the initial supply (`100`), and it should be manually updated by calling `setCap` to allow new liquidity to be provided.
+
+### Run deployment scripts
+Running the deployment script will:
+- Deploy the ConfigurableRightsPool implementation contract
+- Deploy the CRPFactory
+- Call `CRPFactory.newCrp` to create and initialize a new proxy smart pool using the ConfigurableRightsPool implementation address.
+- Give allowance to the crpPool on both involved tokens
+- Call `crpPool.createPool` on the proxy smart pool to create the BPool with the initial supply of 100 tokens
+
+#### Kovan deploy
+
+`yarn run deploy:kovan`
+
+#### Mainnet deploy
+
+`yarn run deploy:mainnet`
+
+## Verify contracts
+
+The flattened versions of the contracts included in `flats` can be used to manually verify the contracts in the explorer with a single file.
+Notice that for the ConfigurableRightsPool implementation contract the libraries addresses should be included in the verification.
+
+To generate them again, run `yarn run flatten`
+
+Then remove the duplicated lines of `SPDX-License-Identifier: GPL-3.0-or-later` and `pragma experimental ABIEncoderV2;` since that will produce and error in the explorer verification as it expect only one license and ABIEncoderV2 instruction per file.

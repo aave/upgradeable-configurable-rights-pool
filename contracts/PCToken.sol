@@ -44,7 +44,7 @@ contract PCToken is IERC20 {
      * @notice Base token constructor
      * @param tokenSymbol - the token symbol
      */
-    constructor (string memory tokenSymbol, string memory tokenName) public {
+    function _initializePCToken(string memory tokenSymbol, string memory tokenName) internal {
         _symbol = tokenSymbol;
         _name = tokenName;
     }

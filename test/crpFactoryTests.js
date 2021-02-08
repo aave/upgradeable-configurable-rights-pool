@@ -9,11 +9,13 @@ const truffleAssert = require('truffle-assertions');
 
 contract('CRPFactory', async (accounts) => {
     const admin = accounts[0];
+    const proxyAdmin = accounts[1];
     const { toWei } = web3.utils;
 
     const MAX = web3.utils.toTwosComplement(-1);
     const swapFee = 10**15;
 
+    let crpImpl;
     let crpFactory;
     let bFactory;
     let crpPool;
@@ -59,6 +61,7 @@ contract('CRPFactory', async (accounts) => {
     before(async () => {
         bFactory = await BFactory.deployed();
         crpFactory = await CRPFactory.deployed();
+        crpImpl = await ConfigurableRightsPool.deployed();
         xyz = await TToken.new('XYZ', 'XYZ', 18);
         weth = await TToken.new('Wrapped Ether', 'WETH', 18);
         dai = await TToken.new('Dai Stablecoin', 'DAI', 18);
@@ -85,12 +88,16 @@ contract('CRPFactory', async (accounts) => {
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin,
         );
 
         await crpFactory.newCrp(
             bFactory.address,
             poolParams,
             longPermissions, // tolerates extra data at end (calldata still the same size)
+            crpImpl.address,
+            proxyAdmin,
         );
 
         crpPool = await ConfigurableRightsPool.at(CRPPOOL);
@@ -133,6 +140,8 @@ contract('CRPFactory', async (accounts) => {
                 bFactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin
             ),
             'ERR_START_WEIGHTS_MISMATCH'
         );
@@ -155,6 +164,8 @@ contract('CRPFactory', async (accounts) => {
                 bFactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin
             ),
             'ERR_START_BALANCES_MISMATCH'
         );
@@ -174,6 +185,8 @@ contract('CRPFactory', async (accounts) => {
             bFactory.address,
             poolParams,
             permissions,
+            crpImpl.address,
+            proxyAdmin
         );
     });
 
@@ -187,13 +200,15 @@ contract('CRPFactory', async (accounts) => {
             swapFee: 0,
         }
 
+        // Reverts with ERR_INVALID_SWAP_FEE
         await truffleAssert.reverts(
             crpFactory.newCrp(
                 bFactory.address,
                 poolParams,
                 permissions,
-            ),
-            'ERR_INVALID_SWAP_FEE'
+                crpImpl.address,
+                proxyAdmin
+            )
         );
     });
 
@@ -211,13 +226,15 @@ contract('CRPFactory', async (accounts) => {
             swapFee: invalidSwapFee,
         }
 
+        // Reverts with ERR_INVALID_SWAP_FEE
         await truffleAssert.reverts(
             crpFactory.newCrp(
                 bFactory.address,
                 poolParams,
                 permissions,
-            ),
-            'ERR_INVALID_SWAP_FEE'
+                crpImpl.address,
+                proxyAdmin
+            )
         );
     });
 
@@ -238,6 +255,8 @@ contract('CRPFactory', async (accounts) => {
                 bFactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin
             ),
             'ERR_TOO_FEW_TOKENS'
         );
@@ -258,13 +277,15 @@ contract('CRPFactory', async (accounts) => {
             swapFee: swapFee,
         }
 
+        // Reverts with ERR_TOO_MANY_TOKENS
         await truffleAssert.reverts(
             crpFactory.newCrp(
                 bFactory.address,
                 poolParams,
                 permissions,
-            ),
-            'ERR_TOO_MANY_TOKENS'
+                crpImpl.address,
+                proxyAdmin
+            )
         );
     });
 });

@@ -35,7 +35,7 @@ contract BalancerReentrancyGuard {
 
     uint private _status;
 
-    constructor () internal {
+    function _initializeReentrancyGuard() internal {
         _status = _NOT_ENTERED;
     }
 

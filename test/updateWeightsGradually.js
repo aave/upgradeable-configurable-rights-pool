@@ -9,6 +9,7 @@ const { assert } = require('chai');
 
 contract('updateWeightsGradually', async (accounts) => {
     const admin = accounts[0];
+    const proxyAdmin = accounts[1];
     const { toWei } = web3.utils;
 
     const MAX = web3.utils.toTwosComplement(-1);
@@ -26,6 +27,7 @@ contract('updateWeightsGradually', async (accounts) => {
     };
 
     describe('Factory (update gradually)', () => {
+        let crpImpl;
         let bfactory;
         let factory;
         let controller;
@@ -43,6 +45,7 @@ contract('updateWeightsGradually', async (accounts) => {
         before(async () => {
             bfactory = await BFactory.deployed();
             factory = await CRPFactory.deployed();
+            crpImpl = await ConfigurableRightsPool.deployed();
             xyz = await TToken.new('XYZ', 'XYZ', 18);
             weth = await TToken.new('Wrapped Ether', 'WETH', 18);
 
@@ -66,12 +69,16 @@ contract('updateWeightsGradually', async (accounts) => {
                 bfactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin,
             );
 
             await factory.newCrp(
                 bfactory.address,
                 poolParams,
                 permissions,
+                crpImpl.address,
+                proxyAdmin,
             );
 
             controller = await ConfigurableRightsPool.at(CONTROLLER);
